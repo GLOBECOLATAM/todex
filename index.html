@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Editor de PDF en el navegador: edita texto con la fuente original, agrega texto, dibuja a mano y descarga. Todo ocurre en tu equipo.">
+<meta name="description" content="Editor de PDF en el navegador: edita texto con la fuente original, agrega texto, dibuja a mano, divide y extrae páginas. Todo ocurre en tu equipo.">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Taller PDF</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,6 +74,26 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 input[type=range]{width:100%;accent-color:var(--accent)}
 .thick{display:flex;align-items:center;gap:10px}
 .thick output{font:12px var(--mono);min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.opts{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.opt{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;cursor:pointer}
+.opt input{margin-top:2px;accent-color:var(--accent)}
+.opt small{display:block;color:var(--muted);font-size:12px}
+.rangelist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.rrow{display:grid;grid-template-columns:12px auto 1fr auto 1fr 30px;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+.rrow .dot{width:10px;height:10px;border-radius:50%}
+.rrow input{padding:5px 6px}
+.rrow .x{width:30px;height:30px;padding:0;justify-content:center}
+.thumbs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.thumb{all:unset;box-sizing:border-box;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border-radius:7px;border:2px solid transparent;cursor:pointer;background:var(--bg)}
+.thumb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.thumb .tc{width:100%;aspect-ratio:var(--ar,0.707);max-width:100%;background:#fff;box-shadow:0 1px 3px rgba(15,20,40,.18);display:block}
+.thumb .tn{font:11px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.thumb .tb{position:absolute;top:2px;right:2px;font:600 10px/1 var(--sans);color:#fff;border-radius:8px;padding:3px 6px}
+.thumb.out{opacity:.45}
+.thumb.on{border-color:var(--accent)}
+.splitsum{margin-top:14px;font-size:13px;line-height:1.45}
+.splitsum b{font-weight:600}
+.err{color:#C62F3B}
 .strokeprev{margin-top:12px;height:44px;background:#fff;border:1px solid var(--line);border-radius:6px;display:block;width:100%}
 .cover{position:absolute;transform-origin:0 84%}
 .grip{position:absolute;width:18px;height:22px;border:0;border-radius:4px;background:#2443C9;color:#fff;cursor:grab;touch-action:none;padding:0;font:13px/22px var(--mono);text-align:center;z-index:2;box-shadow:0 1px 4px rgba(15,20,40,.3)}
@@ -145,6 +165,7 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
       <button id="redoBtn" class="btn icon" title="Rehacer (Ctrl+Y o Ctrl+Mayús+Z)" aria-label="Rehacer" disabled>↷</button>
       <button id="addBtn" class="btn" aria-pressed="false" title="Haz clic en la página para colocar texto nuevo">+ Texto</button>
       <button id="drawBtn" class="btn" aria-pressed="false" title="Dibujar o escribir a mano sobre el PDF">✎ Dibujar</button>
+      <button id="splitBtn" class="btn" aria-pressed="false" title="Sacar páginas o dividir el PDF en varios archivos">✂ Dividir</button>
       <div class="zoom"><button id="zOut" aria-label="Alejar">−</button><span id="zVal">100%</span><button id="zIn" aria-label="Acercar">+</button></div>
       <button id="saveBtn" class="btn primary">Descargar PDF <span id="editCount" class="count">0</span></button>
     </div>
@@ -173,6 +194,47 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
         <div id="sSave" class="saveas"></div>
         <div class="row"><button id="sFit" class="btn" title="Reduce la letra para que el texto quepa en el espacio del original">Ajustar al recuadro</button><button id="sHome" class="btn">Volver a su lugar</button></div>
         <div class="row"><button id="sReset" class="btn">Restaurar original</button><button id="sDel" class="btn">Borrar texto</button></div>
+      </section>
+
+      <section id="splitBox" hidden>
+        <p class="eyebrow">Dividir PDF</p>
+        <div class="seg" role="group" aria-label="Forma de dividir">
+          <button id="mRanges" class="btn" aria-pressed="true"><span>⇥</span>Por rangos</button>
+          <button id="mPick" class="btn" aria-pressed="false"><span>☑</span>Elegir páginas</button>
+          <button id="mFixed" class="btn" aria-pressed="false"><span>≡</span>Cada N págs.</button>
+        </div>
+
+        <div id="pRanges">
+          <div id="rangeList" class="rangelist"></div>
+          <div class="row"><button id="addRange" class="btn">+ Añadir rango</button></div>
+          <div class="opts" role="radiogroup" aria-label="Resultado">
+            <label class="opt"><input type="radio" name="rOut" id="rSep" value="sep" checked><span>Un PDF por cada rango<small>Se descargan juntos en un ZIP</small></span></label>
+            <label class="opt"><input type="radio" name="rOut" id="rMerge" value="merge"><span>Unir los rangos en un solo PDF</span></label>
+          </div>
+        </div>
+
+        <div id="pPick" hidden>
+          <div class="grid">
+            <label for="pickText">Páginas</label><input type="text" id="pickText" placeholder="Ej.: 1-3, 5, 8-10" autocomplete="off">
+          </div>
+          <p class="meta">Escribe las páginas o haz clic en las miniaturas.</p>
+          <div class="row"><button id="pickAll" class="btn">Todas</button><button id="pickNone" class="btn">Ninguna</button><button id="pickOdd" class="btn">Impares</button><button id="pickEven" class="btn">Pares</button></div>
+          <div class="opts" role="radiogroup" aria-label="Resultado">
+            <label class="opt"><input type="radio" name="pOut" id="pOne" value="one" checked><span>Un solo PDF con las páginas elegidas</span></label>
+            <label class="opt"><input type="radio" name="pOut" id="pEach" value="each"><span>Cada página en un PDF aparte<small>Se descargan juntos en un ZIP</small></span></label>
+          </div>
+        </div>
+
+        <div id="pFixed" hidden>
+          <div class="grid">
+            <label for="everyN">Páginas por archivo</label><input type="number" id="everyN" min="1" step="1" value="2">
+          </div>
+        </div>
+
+        <label class="opt" style="margin-top:14px"><input type="checkbox" id="withEdits" checked><span>Incluir mis ediciones y dibujos<small id="withEditsNote"></small></span></label>
+        <div id="splitSum" class="splitsum" role="status"></div>
+        <div class="row"><button id="splitGo" class="btn primary">Dividir y descargar</button><button id="splitDone" class="btn">Cerrar</button></div>
+        <div id="thumbs" class="thumbs" aria-label="Miniaturas de las páginas"></div>
       </section>
 
       <section id="drawBox" hidden>
@@ -214,6 +276,7 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
         <p><b>Haz clic sobre cualquier texto</b> de la página y escribe, como en Word. Enter termina la edición.</p>
         <p>A la derecha verás la <b>fuente original</b> de ese texto, su tamaño y estilo. Puedes cambiarlos.</p>
         <p>Para <b>mover</b> un texto, selecciónalo y arrastra el asa azul <b>⠿</b> que aparece a su izquierda, o usa las flechas del panel (Mayús + flecha = 10 pt).</p>
+        <p>Con <b>✂ Dividir</b> sacas páginas o partes del PDF: por rangos, eligiendo páginas sueltas o cada cierta cantidad de páginas.</p>
         <p>Con <b>✎ Dibujar</b> escribes o subrayas a mano con pluma o resaltador, como en una libreta.</p>
         <p><b>Ctrl+Z</b> deshace y <b>Ctrl+Y</b> rehace el último cambio.</p>
         <p>Con <b>+ Texto</b> primero eliges la fuente del documento con la que quieres escribir y luego haces clic donde va el texto.</p>
@@ -234,6 +297,7 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 (function(){
 const pdfjs = window.pdfjsLib;
@@ -382,7 +446,7 @@ document.addEventListener("keydown", e=>{
 
 /* ---------- abrir ---------- */
 async function openBytes(bytes, name, sample){
-  S.bytes=bytes; S.name=name; S.sample=sample; S.items=[]; S.strokes=[]; S.hist=[]; S.hi=0; S.parsed={}; S.view={}; S.sel=null; S.fonts=new Map(); S.ns=null; setAdding(false); setDrawing(false);
+  S.bytes=bytes; S.name=name; S.sample=sample; S.items=[]; S.strokes=[]; S.hist=[]; S.hi=0; S.thumbs=null; if(S.sp && S.sp.on) setSplit(false); if(S.sp){ S.sp.ranges=null; S.sp.picked=new Set(); } S.parsed={}; S.view={}; S.sel=null; S.fonts=new Map(); S.ns=null; setAdding(false); setDrawing(false);
   $("#docName").textContent = name + (sample?" · ejemplo":"");
   $("#sampleBanner").hidden = !sample;
   showSel();
@@ -521,9 +585,10 @@ function ensureColors(it){
 /* ---------- inspector ---------- */
 function showSel(){
   const it=S.sel;
-  $("#newBox").hidden = !S.adding; $("#drawBox").hidden = !S.drawing;
-  $("#selBox").hidden = !it || S.adding || S.drawing; $("#hint").hidden = !!it || S.adding || S.drawing;
-  if(S.drawing){ placeGrip(); return; }
+  const sp = !!(S.sp && S.sp.on);
+  $("#newBox").hidden = !S.adding; $("#drawBox").hidden = !S.drawing; $("#splitBox").hidden = !sp;
+  $("#selBox").hidden = !it || S.adding || S.drawing || sp; $("#hint").hidden = !!it || S.adding || S.drawing || sp;
+  if(S.drawing || sp){ placeGrip(); return; }
   if(S.adding){ showNew(); }
   if(!it || S.adding){ placeGrip(); return; }
   ensureColors(it);
@@ -649,7 +714,7 @@ function setAdding(on){
   if(on && !S.pdf) return;
   S.adding=on; $("#addBtn").setAttribute("aria-pressed", on); pagesEl.classList.toggle("adding", on);
   if(!on) setPicking(false);
-  if(on){ if(S.drawing) setDrawing(false); if(!S.ns) S.ns=defaultNew(); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); S.sel=null; }
+  if(on){ if(S.drawing) setDrawing(false); if(S.sp && S.sp.on) setSplit(false); if(!S.ns) S.ns=defaultNew(); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); S.sel=null; }
   showSel();
 }
 $("#addBtn").addEventListener("click", ()=>setAdding(!S.adding));
@@ -782,6 +847,7 @@ function drawUI(keepPicker){
 function setDrawing(on){
   if(on && !S.pdf) return;
   if(on && S.adding) setAdding(false);
+  if(on && S.sp && S.sp.on) setSplit(false);
   S.drawing=on; $("#drawBtn").setAttribute("aria-pressed", on); pagesEl.classList.toggle("drawing", on);
   if(on){ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); S.sel=null; drawUI(); }
   showSel();
@@ -821,12 +887,10 @@ pagesEl.addEventListener("drop", e=>{ e.preventDefault(); pagesEl.classList.remo
 
 /* ---------- exportar ---------- */
 function rgbOf(h){ const n=parseInt((h||"#000000").slice(1),16); return PDFLib.rgb(((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255); }
-$("#saveBtn").addEventListener("click", async ()=>{
-  if(!S.bytes) return;
+function hasChanges(){ return S.items.some(isEdited) || S.strokes.length>0; }
+// aplica ediciones de texto y trazos; devuelve el documento pdf-lib listo para guardar
+async function buildEdited(){
   const edits=S.items.filter(isEdited);
-  if(!edits.length && !S.strokes.length){ toast("Aún no has hecho cambios."); return; }
-  const btn=$("#saveBtn"); btn.disabled=true;
-  try{
     const { PDFDocument, StandardFonts, degrees, PDFName } = PDFLib;
     const doc = await PDFDocument.load(S.bytes.slice(), { ignoreEncryption:true });
     const cache={}, sets={}, docCache=new Map();
@@ -910,25 +974,221 @@ $("#saveBtn").addEventListener("click", async ()=>{
       ops.push(P.stroke(), P.popGraphicsState());
       page.pushOperators(...ops);
     }
+    return { doc, replaced, usedDoc };
+}
+// entrega un archivo: en claude.ai con el aviso de descarga; fuera (GitHub Pages) con descarga normal
+async function deliver(fname, data, mime, okMsg){
+  const dl = await downloads();
+  if(!dl){
+    const url=URL.createObjectURL(new Blob([data],{type:mime})), a=document.createElement("a");
+    a.href=url; a.download=fname; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    toast(okMsg); return true;
+  }
+  try{ await dl.save({ filename:fname, data:new Blob([data]) }); toast(okMsg); return true; }
+  catch(err){ toast(err && err.code==="declined" ? "Descarga cancelada" : "No se pudo guardar el archivo: " + (err && err.message || "error")); return false; }
+}
+$("#saveBtn").addEventListener("click", async ()=>{
+  if(!S.bytes) return;
+  if(!hasChanges()){ toast("Aún no has hecho cambios."); return; }
+  const btn=$("#saveBtn"); btn.disabled=true;
+  try{
+    const { doc, replaced, usedDoc } = await buildEdited();
     const out = await doc.save();
-    const dl = await downloads();
-    const fname = S.name.replace(/\.pdf$/i,"") + "-editado.pdf";
-    if(!dl){
-      // fuera de claude.ai (por ejemplo, GitHub Pages): descarga normal del navegador
-      const url=URL.createObjectURL(new Blob([out],{type:"application/pdf"})), a=document.createElement("a");
-      a.href=url; a.download=fname; document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
-      toast("PDF descargado"); return;
-    }
-    try{
-      await dl.save({ filename:fname, data:new Blob([out]) });
-      toast((replaced ? `PDF guardado. ${replaced} carácter(es) no soportados se cambiaron por «?».` : "PDF guardado") + (usedDoc ? ` ${usedDoc} texto(s) con la fuente original.` : ""));
-    }catch(err){
-      toast(err && err.code==="declined" ? "Descarga cancelada" : "No se pudo guardar el archivo: " + (err && err.message || "error"));
-    }
+    await deliver(S.name.replace(/\.pdf$/i,"") + "-editado.pdf", out, "application/pdf",
+      (replaced ? `PDF guardado. ${replaced} carácter(es) no soportados se cambiaron por «?».` : "PDF guardado") + (usedDoc ? ` ${usedDoc} texto(s) con la fuente original.` : ""));
   }catch(err){
     toast("No se pudo generar el PDF. Si está cifrado, quítale la protección y vuelve a intentar.");
   }finally{ btn.disabled=false; }
 });
+
+/* ---------- dividir PDF ---------- */
+S.sp = { on:false, mode:"ranges", ranges:null, picked:new Set(), every:2 };
+const RCOL=["#2443C9","#C2410C","#1E8C5A","#9333EA","#B8860B","#0E7490","#BE185D","#4D7C0F"];
+const nPages=()=> S.pdf ? S.pdf.numPages : 0;
+function parsePages(txt, max){
+  const out=new Set(), bad=[];
+  for(const part of (txt||"").split(/[,;\s]+/).filter(Boolean)){
+    const m=part.match(/^(\d+)(?:-(\d*))?$/);
+    if(!m){ bad.push(part); continue; }
+    let a=+m[1], b= m[2]===undefined ? a : (m[2]==="" ? max : +m[2]);
+    if(a>b) [a,b]=[b,a];
+    if(a<1 || b>max){ bad.push(part); a=Math.max(1,a); b=Math.min(max,b); }
+    for(let i=a;i<=b;i++) out.add(i);
+  }
+  return { pages:[...out].sort((x,y)=>x-y), bad };
+}
+function compact(pages){
+  const out=[]; let i=0;
+  while(i<pages.length){ let j=i; while(j+1<pages.length && pages[j+1]===pages[j]+1) j++; out.push(i===j ? ""+pages[i] : pages[i]+"-"+pages[j]); i=j+1; }
+  return out.join(", ");
+}
+// grupos de páginas (1-based) que se convertirán en archivos
+function splitPlan(){
+  const N=nPages(), sp=S.sp, errs=[];
+  let groups=[], names=[];
+  if(sp.mode==="ranges"){
+    const valid=sp.ranges.map(r=>{ let a=Math.max(1,Math.min(N,Math.round(r.from||1))), b=Math.max(1,Math.min(N,Math.round(r.to||a))); if(a>b) [a,b]=[b,a]; return [a,b]; });
+    sp.ranges.forEach((r,i)=>{ if(!(r.from>=1 && r.from<=N) || !(r.to>=1 && r.to<=N)) errs.push(`Rango ${i+1}: usa páginas entre 1 y ${N}.`); });
+    const merge=$("#rMerge").checked;
+    const seqs=valid.map(([a,b])=>{ const g=[]; for(let p=a;p<=b;p++) g.push(p); return g; });
+    if(merge){ groups=[seqs.flat()]; names=["rangos-"+valid.map(([a,b])=>a===b?a:a+"-"+b).join("_")]; }
+    else { groups=seqs; names=valid.map(([a,b])=>"paginas-"+(a===b?a:a+"-"+b)); }
+  } else if(sp.mode==="pick"){
+    const pages=[...sp.picked].sort((a,b)=>a-b);
+    if(!pages.length) errs.push("Elige al menos una página.");
+    if($("#pEach").checked){ groups=pages.map(p=>[p]); names=pages.map(p=>"pagina-"+p); }
+    else if(pages.length){ groups=[pages]; names=["paginas-"+compact(pages).replace(/, /g,"_")]; }
+  } else {
+    const k=Math.max(1, Math.floor(sp.every||1));
+    for(let a=1;a<=N;a+=k){ const b=Math.min(N,a+k-1); const g=[]; for(let p=a;p<=b;p++) g.push(p); groups.push(g); names.push("paginas-"+(a===b?a:a+"-"+b)); }
+  }
+  return { groups, names, errs };
+}
+function pageColor(){
+  // a cada página le asigna el color de su archivo (o null si queda fuera)
+  const { groups }=splitPlan(), map=new Map();
+  groups.forEach((g,i)=>g.forEach(p=>{ if(!map.has(p)) map.set(p,i); }));
+  return map;
+}
+function renderRanges(){
+  const box=$("#rangeList"); box.innerHTML="";
+  S.sp.ranges.forEach((r,i)=>{
+    const row=document.createElement("div"); row.className="rrow";
+    row.innerHTML=`<span class="dot"></span><label for="rf${i}">Desde</label><input type="number" id="rf${i}" min="1"><label for="rt${i}">hasta</label><input type="number" id="rt${i}" min="1"><button class="btn x" title="Quitar rango" aria-label="Quitar rango ${i+1}">×</button>`;
+    row.querySelector(".dot").style.background=RCOL[i%RCOL.length];
+    const f=row.querySelector("#rf"+i), t=row.querySelector("#rt"+i);
+    f.max=t.max=nPages(); f.value=r.from; t.value=r.to;
+    f.addEventListener("input",()=>{ r.from=parseInt(f.value,10); splitUI(true); });
+    t.addEventListener("input",()=>{ r.to=parseInt(t.value,10); splitUI(true); });
+    const x=row.querySelector(".x"); x.disabled=S.sp.ranges.length===1;
+    x.addEventListener("click",()=>{ S.sp.ranges.splice(i,1); renderRanges(); splitUI(); });
+    box.append(row);
+  });
+}
+function splitUI(keepInputs){
+  const sp=S.sp, N=nPages();
+  ["mRanges","mPick","mFixed"].forEach(id=>$("#"+id).setAttribute("aria-pressed", ({mRanges:"ranges",mPick:"pick",mFixed:"fixed"})[id]===sp.mode));
+  $("#pRanges").hidden = sp.mode!=="ranges"; $("#pPick").hidden = sp.mode!=="pick"; $("#pFixed").hidden = sp.mode!=="fixed";
+  if(sp.mode==="ranges" && !keepInputs) renderRanges();
+  if(sp.mode==="pick" && document.activeElement!==$("#pickText")) $("#pickText").value=compact([...sp.picked].sort((a,b)=>a-b));
+  const changes=hasChanges();
+  $("#withEdits").disabled=!changes;
+  $("#withEditsNote").textContent = changes ? "Las páginas salen con el texto editado y los trazos." : "Aún no hay ediciones en este documento.";
+  const { groups, errs }=splitPlan();
+  const total=groups.reduce((n,g)=>n+g.length,0), sum=$("#splitSum");
+  sum.innerHTML="";
+  if(errs.length){ sum.className="splitsum err"; sum.textContent=errs[0]; }
+  else {
+    sum.className="splitsum";
+    const b=document.createElement("b"); b.textContent = groups.length===1 ? "1 archivo PDF" : `${groups.length} archivos PDF en un ZIP`;
+    sum.append(b, document.createTextNode(` · ${total} ${total===1?"página":"páginas"} de ${N}`));
+  }
+  $("#splitGo").disabled = !!errs.length || !groups.length;
+  paintThumbs();
+}
+function paintThumbs(){
+  const box=$("#thumbs"); if(!box.children.length) return;
+  const map=pageColor(), sp=S.sp;
+  [...box.children].forEach(el=>{
+    const p=+el.dataset.p, gi=map.get(p), badge=el.querySelector(".tb");
+    const inSel = gi!==undefined;
+    el.classList.toggle("out", !inSel);
+    el.classList.toggle("on", sp.mode==="pick" && sp.picked.has(p));
+    el.setAttribute("aria-pressed", sp.mode==="pick" ? String(sp.picked.has(p)) : "false");
+    const col = inSel ? (sp.mode==="pick" ? "var(--accent)" : RCOL[gi%RCOL.length]) : "transparent";
+    el.style.borderColor = col;
+    badge.hidden = !inSel || (sp.mode==="pick" && !$("#pEach").checked && false);
+    badge.style.background = inSel ? (sp.mode==="pick" ? "var(--accent)" : RCOL[gi%RCOL.length]) : "";
+    badge.textContent = inSel ? (sp.mode==="pick" ? "✓" : "Archivo "+(gi+1)) : "";
+  });
+}
+let thumbIO=null;
+async function buildThumbs(){
+  const box=$("#thumbs"); if(box.children.length && S.thumbs===S.pdf) return;
+  box.innerHTML=""; S.thumbs=S.pdf;
+  const p1=await S.pdf.getPage(1), v=p1.getViewport({scale:1});
+  box.style.setProperty("--ar", (v.width/v.height).toFixed(3));
+  if(thumbIO) thumbIO.disconnect();
+  thumbIO=new IntersectionObserver(ents=>ents.forEach(async en=>{
+    if(!en.isIntersecting) return; const el=en.target; thumbIO.unobserve(el);
+    try{
+      const pg=await S.pdf.getPage(+el.dataset.p), vp0=pg.getViewport({scale:1}), sc=180/vp0.width, vp=pg.getViewport({scale:sc});
+      const c=el.querySelector("canvas"); c.width=Math.floor(vp.width); c.height=Math.floor(vp.height);
+      await pg.render({canvasContext:c.getContext("2d"), viewport:vp}).promise;
+    }catch(e){}
+  }), { root: document.querySelector(".panel"), rootMargin:"300px" });
+  for(let p=1;p<=S.pdf.numPages;p++){
+    const b=document.createElement("button"); b.className="thumb"; b.dataset.p=p; b.setAttribute("aria-label","Página "+p);
+    b.innerHTML=`<canvas class="tc"></canvas><span class="tn">${p}</span><span class="tb"></span>`;
+    b.addEventListener("click",()=>{
+      const sp=S.sp;
+      if(sp.mode!=="pick"){ sp.mode="pick"; if(!sp.picked.size) sp.picked=new Set(); }
+      sp.picked.has(p) ? sp.picked.delete(p) : sp.picked.add(p);
+      splitUI();
+    });
+    box.append(b); thumbIO.observe(b);
+  }
+}
+function setSplit(on){
+  if(on && !S.pdf) return;
+  if(on){ if(S.adding) setAdding(false); if(S.drawing) setDrawing(false); if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); S.sel=null; }
+  S.sp.on=on; $("#splitBtn").setAttribute("aria-pressed", on);
+  if(on){
+    const N=nPages();
+    if(!S.sp.ranges) S.sp.ranges=[{from:1, to:Math.min(N, Math.max(1, Math.ceil(N/2)))}];
+    $("#everyN").value=S.sp.every; $("#everyN").max=N;
+    $("#withEdits").checked = hasChanges();
+    buildThumbs().then(()=>paintThumbs());
+    splitUI();
+  }
+  showSel();
+}
+$("#splitBtn").addEventListener("click", ()=>setSplit(!S.sp.on));
+$("#splitDone").addEventListener("click", ()=>setSplit(false));
+$("#mRanges").addEventListener("click", ()=>{ S.sp.mode="ranges"; splitUI(); });
+$("#mPick").addEventListener("click", ()=>{ S.sp.mode="pick"; splitUI(); });
+$("#mFixed").addEventListener("click", ()=>{ S.sp.mode="fixed"; splitUI(); });
+$("#addRange").addEventListener("click", ()=>{
+  const N=nPages(), last=S.sp.ranges[S.sp.ranges.length-1], a=Math.min(N, ((last&&last.to)||0)+1);
+  S.sp.ranges.push({from:a, to:N}); renderRanges(); splitUI(true);
+  const inp=$("#rf"+(S.sp.ranges.length-1)); if(inp) inp.focus();
+});
+$("#pickText").addEventListener("input", e=>{ const { pages }=parsePages(e.target.value, nPages()); S.sp.picked=new Set(pages); splitUI(); });
+$("#pickText").addEventListener("change", e=>{ const { bad }=parsePages(e.target.value, nPages()); if(bad.length) toast(`Revisa: ${bad.join(", ")}. El documento tiene ${nPages()} páginas.`); e.target.value=compact([...S.sp.picked].sort((a,b)=>a-b)); });
+const pickBy=f=>{ const s=new Set(); for(let p=1;p<=nPages();p++) if(f(p)) s.add(p); S.sp.picked=s; S.sp.mode="pick"; splitUI(); };
+$("#pickAll").addEventListener("click", ()=>pickBy(()=>true));
+$("#pickNone").addEventListener("click", ()=>pickBy(()=>false));
+$("#pickOdd").addEventListener("click", ()=>pickBy(p=>p%2===1));
+$("#pickEven").addEventListener("click", ()=>pickBy(p=>p%2===0));
+$("#everyN").addEventListener("input", e=>{ const v=parseInt(e.target.value,10); if(v>=1){ S.sp.every=v; splitUI(); } });
+["rSep","rMerge","pOne","pEach"].forEach(id=>$("#"+id).addEventListener("change", ()=>splitUI(true)));
+$("#splitGo").addEventListener("click", async ()=>{
+  const { groups, names, errs }=splitPlan(); if(errs.length || !groups.length) return;
+  const btn=$("#splitGo"), label=btn.textContent; btn.disabled=true; btn.textContent="Preparando…";
+  try{
+    const { PDFDocument }=PDFLib;
+    const src = ($("#withEdits").checked && hasChanges()) ? (await buildEdited()).doc : await PDFDocument.load(S.bytes.slice(), { ignoreEncryption:true });
+    const base=S.name.replace(/\.pdf$/i,"");
+    const files=[];
+    for(let i=0;i<groups.length;i++){
+      const out=await PDFDocument.create();
+      const pages=await out.copyPages(src, groups[i].map(p=>p-1));
+      pages.forEach(pg=>out.addPage(pg));
+      files.push({ name:`${base}-${names[i]}.pdf`, bytes:await out.save() });
+    }
+    if(files.length===1){
+      await deliver(files[0].name, files[0].bytes, "application/pdf", `PDF listo: ${groups[0].length} ${groups[0].length===1?"página":"páginas"}`);
+    } else {
+      if(!window.JSZip){ toast("No se pudo cargar el compresor ZIP. Revisa tu conexión y vuelve a intentar."); return; }
+      const zip=new JSZip(); files.forEach(f=>zip.file(f.name, f.bytes));
+      const blob=await zip.generateAsync({ type:"uint8array", compression:"DEFLATE" });
+      await deliver(`${base}-dividido.zip`, blob, "application/zip", `ZIP listo con ${files.length} archivos PDF`);
+    }
+  }catch(err){
+    console.warn(err); toast("No se pudo dividir el PDF. Si está cifrado, quítale la protección y vuelve a intentar.");
+  }finally{ btn.disabled=false; btn.textContent=label; splitUI(true); }
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && S.sp.on && !(e.target && e.target.tagName==="INPUT")) setSplit(false); });
 
 /* ---------- documento de ejemplo ---------- */
 async function makeSample(){

@@ -1,6 +1,8 @@
 # Taller PDF
 
-Editor de PDF que funciona en el navegador. Abres un PDF, editas su texto como en Word, agregas texto nuevo, escribes o subrayas a mano y descargas el resultado.
+Editor de PDF que funciona en el navegador. Abres un PDF, editas su texto como en Word, agregas texto nuevo, escribes o subrayas a mano, sacas páginas o lo divides en varios archivos, y descargas el resultado.
+
+**Úsalo aquí:** https://globecolatam.github.io/taller-pdf/
 
 **Todo ocurre en tu equipo.** El PDF no se sube a ningún servidor. La página solo descarga las librerías de código abierto que usa.
 
@@ -10,6 +12,11 @@ Editor de PDF que funciona en el navegador. Abres un PDF, editas su texto como e
 - **Ver qué fuente usa cada texto**: el panel muestra el nombre real de la fuente, su tamaño y estilo, y la lista de todas las fuentes del documento.
 - **Agregar texto con la fuente del documento**: con «+ Texto» eliges primero la fuente (o copias el estilo de un texto existente) y luego haces clic donde va.
 - **Dibujar a mano**: pluma, resaltador y borrador, con colores y grosor. Sirve para firmas, subrayados y notas.
+- **Dividir PDF y sacar páginas** (botón «✂ Dividir»):
+  - *Por rangos*: por ejemplo páginas 1–5 y 7–9. Cada rango sale en su propio PDF (todos juntos en un ZIP) o unidos en un solo PDF.
+  - *Elegir páginas*: escribes `2, 4-5, 10` o haces clic en las miniaturas. Atajos para todas, impares o pares. Sale un solo PDF o una página por archivo.
+  - *Cada N páginas*: corta el documento en partes iguales, por ejemplo de 3 en 3.
+  - Opción para incluir o no tus ediciones y dibujos en las páginas que sacas.
 - **Deshacer y rehacer**: Ctrl+Z / Ctrl+Y (Cmd en Mac), o los botones ↶ ↷.
 - **Descargar** el PDF editado. El original no se modifica.
 
@@ -34,6 +41,7 @@ Para usarla sin internet basta con abrir `index.html` en el navegador. La primer
 - [PDF.js](https://github.com/mozilla/pdf.js) 3.11.174 (Apache-2.0): lee y muestra el PDF.
 - [pdf-lib](https://github.com/Hopding/pdf-lib) 1.17.1 (MIT): escribe el PDF editado.
 - [@pdf-lib/fontkit](https://github.com/Hopding/fontkit) 1.1.1 (MIT): revisa qué letras trae cada fuente.
+- [JSZip](https://github.com/Stuk/jszip) 3.10.1 (MIT): arma el ZIP cuando divides en varios archivos.
 
 Se cargan desde cdnjs y jsDelivr con la versión fija.
 
