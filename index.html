@@ -3,26 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Editor de PDF en el navegador: edita texto con la fuente original, agrega texto, dibuja a mano, divide y extrae páginas. Todo ocurre en tu equipo.">
+<meta name="description" content="TODEX de Globeco Smart: Todas las Operaciones de Documentos EXpress. Edita, anota y divide tus PDF en el navegador, conservando la fuente original. Sin instalar nada.">
+<meta name="theme-color" content="#071A2B">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Globeco Smart">
+<meta property="og:title" content="TODEX · Globeco Smart">
+<meta property="og:description" content="Todas las Operaciones de Documentos EXpress. Edita, anota y divide tus PDF en el navegador, gratis y sin instalar nada.">
+<meta property="og:url" content="https://globecolatam.github.io/todex/">
+<meta property="og:image" content="https://globecolatam.github.io/todex/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23071A2B%22/%3E%3Cpath%20d%3D%22M18%2016h12l14%2032H32z%22%20fill%3D%22%232FD39E%22/%3E%3Cpath%20d%3D%22M46%2016H34L20%2048h12z%22%20fill%3D%22%23378ADD%22/%3E%3C/svg%3E">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Taller PDF</title>
+<title>TODEX | Globeco Smart</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: barra de herramientas arriba; mesa de páginas a la izquierda, inspector de tipografía a la derecha (se apila en móvil) */
+/* TODEX · Globeco Smart. Layout: portada de entrada; luego barra arriba, páginas a la izquierda, panel a la derecha (se apila en móvil) */
 :root{
-  --bg:#ECEEF3; --surface:#FFFFFF; --ink:#151B2B; --muted:#5A6377; --line:#D4D9E3;
-  --accent:#2443C9; --accent-soft:#E3E8FB; --warn:#C98A00;
+  --navy:#071A2B; --navy-2:#0C2A44; --brand:#378ADD; --teal:#1D9E75;
+  --bg:#EDF2F7; --surface:#FFFFFF; --glass:rgba(255,255,255,.72); --ink:#071A2B; --muted:#4F6378; --line:#D2DDE8;
+  --accent:#2C7BD0; --accent-soft:#E2EEFA; --ok:#1D9E75; --warn:#B07A00;
+  --display:"Bebas Neue", "Oswald", Impact, "Arial Narrow", sans-serif;
   --sans:"IBM Plex Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F121A; --surface:#181D29; --ink:#E6E9F2; --muted:#98A1B6; --line:#2A3143;
-  --accent:#8EA3FF; --accent-soft:#1F2847; --warn:#F0B429; color-scheme:dark }}
+  --bg:#06131F; --surface:#0C2033; --glass:rgba(12,32,51,.72); --ink:#E6EEF6; --muted:#8EA6BD; --line:#1B3550;
+  --accent:#5AA3EC; --accent-soft:#11314E; --ok:#2BB98C; --warn:#F0B429; color-scheme:dark }}
 :root[data-theme="dark"]{
-  --bg:#0F121A; --surface:#181D29; --ink:#E6E9F2; --muted:#98A1B6; --line:#2A3143;
-  --accent:#8EA3FF; --accent-soft:#1F2847; --warn:#F0B429; color-scheme:dark }
+  --bg:#06131F; --surface:#0C2033; --glass:rgba(12,32,51,.72); --ink:#E6EEF6; --muted:#8EA6BD; --line:#1B3550;
+  --accent:#5AA3EC; --accent-soft:#11314E; --ok:#2BB98C; --warn:#F0B429; color-scheme:dark }
 
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px}
@@ -30,9 +43,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14p
 .bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;
   padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   background:var(--surface);border-bottom:1px solid var(--line)}
-.brand{display:flex;gap:10px;align-items:center;min-width:0}
-.mark{width:32px;height:32px;border-radius:7px;background:var(--accent);color:var(--surface);display:grid;place-items:center;font:600 18px/1 var(--mono)}
-.brand strong{display:block;font-weight:600;font-size:15px}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.brandbtn{all:unset;cursor:pointer;display:flex;flex-direction:column;line-height:1;border-radius:6px}
+.brandbtn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wm{font:400 30px/0.9 var(--display);letter-spacing:.04em;color:var(--ink)}
+.wm b{font-weight:400;color:var(--teal)}
+.by{font:500 9.5px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.brand .sep{width:1px;align-self:stretch;background:var(--line)}
 .doc{display:block;color:var(--muted);font:12px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42ch}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .btn{font:500 13px var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 12px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;line-height:1.2}
@@ -139,6 +156,58 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
 .fonts .fd{grid-column:1/-1;font-size:12px;color:var(--muted)}
 .note{font-size:12px;line-height:1.5;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin:0}
 .banner{font-size:12.5px;background:var(--accent-soft);color:var(--ink);border-radius:7px;padding:10px 12px;line-height:1.45}
+.thm{width:34px;height:34px;padding:0;justify-content:center;font-size:15px}
+.credit{font-size:11.5px;color:var(--muted);letter-spacing:.02em;margin:0}
+.credit b{font-weight:600;color:var(--ink)}
+
+/* ---------- portada ---------- */
+.home{position:fixed;inset:0;z-index:40;overflow:auto;background:var(--bg);
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.home[hidden]{display:none}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.homebar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px}
+.hero{position:relative;overflow:hidden;border-radius:18px;color:#F2F7FC;padding:clamp(28px,5vw,56px) clamp(20px,5vw,56px);
+  background:radial-gradient(120% 140% at 100% 0%, rgba(55,138,221,.38) 0%, rgba(55,138,221,0) 55%),
+             radial-gradient(90% 120% at 0% 100%, rgba(29,158,117,.30) 0%, rgba(29,158,117,0) 55%),
+             linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%);
+  box-shadow:0 24px 60px -24px rgba(7,26,43,.55)}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:36px 36px;mask-image:linear-gradient(180deg,#000 0%,transparent 90%);-webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 90%)}
+.hero > *{position:relative}
+.kicker{font:600 11px var(--sans);letter-spacing:.22em;text-transform:uppercase;color:#9CC6EF;margin:0 0 14px}
+.bigwm{font:400 clamp(88px,17vw,184px)/.82 var(--display);letter-spacing:.03em;margin:0;color:#FFFFFF}
+.bigwm b{font-weight:400;color:#2FD39E}
+.acro{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.acro li{display:flex;align-items:baseline;gap:1px;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:14px;color:#D9E6F2}
+.acro li b{font:400 24px/1 var(--display);color:#FFFFFF;letter-spacing:.04em}
+.acro li:last-child b{color:#2FD39E}
+.lead{font-size:clamp(16px,2.2vw,19px);line-height:1.5;max-width:52ch;margin:22px 0 0;color:#DDE8F3;text-wrap:pretty}
+.ctas{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:26px}
+.cta{font:600 15px var(--sans);display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:12px;cursor:pointer;border:1px solid transparent;line-height:1}
+.cta.main{background:var(--brand);color:#fff;box-shadow:0 10px 24px -10px rgba(55,138,221,.9)}
+.cta.main:hover{background:#4A98E6}
+.cta.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.22)}
+.cta.ghost:hover{background:rgba(255,255,255,.14)}
+.cta[hidden]{display:none}
+.cta:focus-visible{outline:2px solid #2FD39E;outline-offset:3px}
+.droptip{font-size:13px;color:#A9C1D8}
+.hero.drag{outline:2px dashed #2FD39E;outline-offset:-10px}
+.privacy{display:flex;gap:8px;align-items:center;margin-top:22px;font-size:13px;color:#A9C1D8}
+.privacy i{font-style:normal;width:8px;height:8px;border-radius:50%;background:#2FD39E;box-shadow:0 0 0 4px rgba(47,211,158,.18)}
+.sect{margin-top:34px}
+.secth{font:400 28px/1 var(--display);letter-spacing:.05em;margin:0 0 14px;color:var(--ink)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;flex-direction:column;gap:8px}
+.card .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--accent-soft);color:var(--accent)}
+.card h3{margin:0;font:600 15px var(--sans);color:var(--ink)}
+.card p{margin:0;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.card.soon{background:transparent;border-style:dashed}
+.card.soon .ic{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.homefoot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid var(--line);margin-top:34px;padding-block:18px 28px}
+.homebar .wm{font-size:28px}
+@media (max-width:560px){ .homebar .by{display:none} }
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
 .loading{color:var(--muted);font:13px var(--mono);padding:40px}
 
@@ -155,8 +224,9 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
 <div class="app">
   <header class="bar">
     <div class="brand">
-      <span class="mark" aria-hidden="true">¶</span>
-      <div style="min-width:0"><strong>Taller PDF</strong><span id="docName" class="doc">cargando…</span></div>
+      <button id="homeBtn" class="brandbtn" title="Ir al inicio de TODEX"><span class="wm">TODE<b>X</b></span><span class="by">Globeco Smart</span></button>
+      <span class="sep" aria-hidden="true"></span>
+      <div style="min-width:0"><span id="docName" class="doc">Sin documento</span></div>
     </div>
     <div class="tools">
       <label class="btn" for="fileIn">Abrir PDF</label>
@@ -167,12 +237,13 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
       <button id="drawBtn" class="btn" aria-pressed="false" title="Dibujar o escribir a mano sobre el PDF">✎ Dibujar</button>
       <button id="splitBtn" class="btn" aria-pressed="false" title="Sacar páginas o dividir el PDF en varios archivos">✂ Dividir</button>
       <div class="zoom"><button id="zOut" aria-label="Alejar">−</button><span id="zVal">100%</span><button id="zIn" aria-label="Acercar">+</button></div>
+      <button class="btn thm" data-theme-toggle title="Cambiar entre modo claro y oscuro" aria-label="Cambiar modo claro u oscuro">◐</button>
       <button id="saveBtn" class="btn primary">Descargar PDF <span id="editCount" class="count">0</span></button>
     </div>
   </header>
 
   <main class="work">
-    <section id="pages" class="pages" aria-label="Páginas del documento"><div class="loading">Preparando el editor…</div></section>
+    <section id="pages" class="pages" aria-label="Páginas del documento"><div class="loading">Abre un PDF para empezar.</div></section>
 
     <aside class="panel">
       <div id="sampleBanner" class="banner" hidden>Estás viendo un <b>documento de ejemplo</b>. Pulsa «Abrir PDF» o arrastra tu archivo sobre las páginas.</div>
@@ -288,9 +359,54 @@ input[type=color]{width:44px;height:30px;border:1px solid var(--line);border-rad
       </section>
 
       <p class="note">Al descargar se usa la fuente original del documento siempre que incluya todas las letras que escribiste. Los PDF suelen traer solo las letras que usan; si falta alguna, ese texto se guarda con la fuente estándar más parecida (Helvetica, Times o Courier). El panel te avisa antes. El resto del PDF queda intacto. Los PDF escaneados (imagen) no tienen texto editable.</p>
+      <p class="credit">TODEX · una herramienta de <b>Globeco Smart</b><br>Designed by W.I.G. — CTO &amp; DoA</p>
     </aside>
   </main>
   <div id="toast" class="toast" role="status" hidden></div>
+</div>
+
+<div id="home" class="home">
+  <div class="wrap">
+    <div class="homebar">
+      <div class="brand"><span class="brandbtn" aria-hidden="true"><span class="wm">TODE<b>X</b></span><span class="by">Globeco Smart</span></span></div>
+      <button class="btn thm" data-theme-toggle title="Cambiar entre modo claro y oscuro" aria-label="Cambiar modo claro u oscuro">◐</button>
+    </div>
+
+    <section id="hero" class="hero" aria-labelledby="heroTitle">
+      <p class="kicker">Globeco Smart · Herramientas de documentos</p>
+      <h1 id="heroTitle" class="bigwm">TODE<b>X</b></h1>
+      <ol class="acro" aria-label="Significado de TODEX">
+        <li><b>T</b>odas las</li>
+        <li><b>O</b>peraciones de</li>
+        <li><b>D</b>ocumentos</li>
+        <li><b>EX</b>press</li>
+      </ol>
+      <p class="lead">Edita, anota y divide tus PDF directamente en el navegador. Sin instalar nada y conservando la fuente original del documento.</p>
+      <div class="ctas">
+        <label class="cta main" for="fileIn">Abrir un PDF</label>
+        <button id="sampleBtn" class="cta ghost">Probar con un ejemplo</button>
+        <button id="backBtn" class="cta ghost" hidden>Volver al documento</button>
+        <span class="droptip">o arrastra tu archivo aquí</span>
+      </div>
+      <p class="privacy"><i aria-hidden="true"></i>Tus archivos se procesan en tu equipo. No se suben a ningún servidor.</p>
+    </section>
+
+    <section class="sect" aria-labelledby="toolsTitle">
+      <h2 id="toolsTitle" class="secth">Herramientas</h2>
+      <div class="cards">
+        <article class="card"><span class="ic" aria-hidden="true">Aa</span><h3>Editar texto</h3><p>Haz clic en cualquier texto y cámbialo como en Word. TODEX detecta la fuente y la reutiliza al guardar.</p></article>
+        <article class="card"><span class="ic" aria-hidden="true">＋</span><h3>Agregar texto</h3><p>Elige una fuente del propio documento, escribe y colócalo donde quieras.</p></article>
+        <article class="card"><span class="ic" aria-hidden="true">✎</span><h3>Dibujar y resaltar</h3><p>Pluma, resaltador y borrador para firmas, subrayados y notas a mano.</p></article>
+        <article class="card"><span class="ic" aria-hidden="true">✂</span><h3>Dividir y extraer</h3><p>Saca páginas por rangos, elige páginas sueltas o corta cada N páginas. Descarga en PDF o ZIP.</p></article>
+        <article class="card soon"><span class="ic" aria-hidden="true">…</span><h3>Más herramientas en camino</h3><p>TODEX seguirá creciendo con nuevas operaciones para tus documentos.</p></article>
+      </div>
+    </section>
+
+    <footer class="homefoot">
+      <p class="credit">TODEX · una herramienta de <b>Globeco Smart</b></p>
+      <p class="credit">Designed by W.I.G. — CTO &amp; DoA</p>
+    </footer>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -878,8 +994,25 @@ async function openFile(file){
   if(!file) return;
   if(!/pdf$/i.test(file.type) && !/\.pdf$/i.test(file.name)){ toast("Ese archivo no es un PDF."); return; }
   const buf=new Uint8Array(await file.arrayBuffer());
+  showHome(false);
   await openBytes(buf, file.name, false);
 }
+/* ---------- portada y tema ---------- */
+function showHome(on){
+  $("#home").hidden=!on; document.body.style.overflow = on ? "hidden" : "";
+  if(on){ const b=$("#backBtn"); b.hidden=!S.pdf; if(S.pdf) b.textContent="Volver a "+(S.name.length>28?S.name.slice(0,26)+"…":S.name); $("#home").scrollTop=0; }
+}
+$("#homeBtn").addEventListener("click", ()=>showHome(true));
+$("#backBtn").addEventListener("click", ()=>showHome(false));
+$("#sampleBtn").addEventListener("click", async ()=>{ showHome(false); try{ await openBytes(await makeSample(), "ejemplo-acta.pdf", true); }catch(e){ toast("No se pudo cargar el ejemplo."); } });
+const hero=$("#hero");
+["dragenter","dragover"].forEach(ev=>$("#home").addEventListener(ev, e=>{ e.preventDefault(); hero.classList.add("drag"); }));
+$("#home").addEventListener("dragleave", e=>{ if(!e.relatedTarget || !$("#home").contains(e.relatedTarget)) hero.classList.remove("drag"); });
+$("#home").addEventListener("drop", e=>{ e.preventDefault(); hero.classList.remove("drag"); openFile(e.dataTransfer.files[0]); });
+function curTheme(){ const t=document.documentElement.getAttribute("data-theme"); if(t==="dark"||t==="light") return t; return matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"; }
+function applyTheme(t){ document.documentElement.setAttribute("data-theme", t); document.querySelectorAll("[data-theme-toggle]").forEach(b=>{ b.textContent = t==="dark" ? "☀" : "☾"; b.title = t==="dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"; }); }
+try{ const saved=localStorage.getItem("todex-theme"); if(saved==="dark"||saved==="light") applyTheme(saved); else applyTheme(curTheme()); }catch(e){ applyTheme(curTheme()); }
+document.querySelectorAll("[data-theme-toggle]").forEach(b=>b.addEventListener("click", ()=>{ const t=curTheme()==="dark"?"light":"dark"; applyTheme(t); try{ localStorage.setItem("todex-theme", t); }catch(e){} }));
 $("#fileIn").addEventListener("change", e=>{ openFile(e.target.files[0]); e.target.value=""; });
 pagesEl.addEventListener("dragover", e=>{ e.preventDefault(); pagesEl.classList.add("drop"); });
 pagesEl.addEventListener("dragleave", ()=>pagesEl.classList.remove("drop"));
@@ -1218,11 +1351,9 @@ async function makeSample(){
   return await d.save();
 }
 
-(async ()=>{
-  try{ await openBytes(await makeSample(), "ejemplo-acta.pdf", true); }
-  catch(e){ pagesEl.innerHTML='<div class="loading">No se pudo cargar el editor. Recarga la página.</div>'; }
-  downloads();
-})();
+// arranca en la portada; el editor se llena al abrir un PDF o el ejemplo
+showHome(true);
+downloads();
 })();
 </script>
 

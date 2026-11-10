@@ -1,8 +1,10 @@
-# Taller PDF
+# TODEX · Globeco Smart
 
-Editor de PDF que funciona en el navegador. Abres un PDF, editas su texto como en Word, agregas texto nuevo, escribes o subrayas a mano, sacas páginas o lo divides en varios archivos, y descargas el resultado.
+**T**odas las **O**peraciones de **D**ocumentos **EX**press.
 
-**Úsalo aquí:** https://globecolatam.github.io/taller-pdf/
+TODEX es la herramienta de documentos de Globeco Smart. Abres un PDF y lo trabajas directamente en el navegador: editas su texto como en Word, agregas texto nuevo con la fuente del propio documento, escribes o subrayas a mano, sacas páginas o lo divides en varios archivos, y descargas el resultado.
+
+**Úsalo aquí:** https://globecolatam.github.io/todex/
 
 **Todo ocurre en tu equipo.** El PDF no se sube a ningún servidor. La página solo descarga las librerías de código abierto que usa.
 
@@ -18,6 +20,7 @@ Editor de PDF que funciona en el navegador. Abres un PDF, editas su texto como e
   - *Cada N páginas*: corta el documento en partes iguales, por ejemplo de 3 en 3.
   - Opción para incluir o no tus ediciones y dibujos en las páginas que sacas.
 - **Deshacer y rehacer**: Ctrl+Z / Ctrl+Y (Cmd en Mac), o los botones ↶ ↷.
+- **Modo claro y oscuro** con botón manual.
 - **Descargar** el PDF editado. El original no se modifica.
 
 ## Limitaciones
@@ -26,15 +29,6 @@ Editor de PDF que funciona en el navegador. Abres un PDF, editas su texto como e
 - El texto editado se escribe encima del original y lo tapa con el color de fondo. El texto original sigue dentro del archivo, debajo. No uses esta herramienta para ocultar información confidencial.
 - Los PDF escaneados (imágenes) no tienen texto editable. Sí se puede dibujar sobre ellos.
 - Los PDF protegidos con contraseña no se pueden abrir.
-
-## Publicarlo con GitHub Pages
-
-1. Crea un repositorio nuevo en GitHub, por ejemplo `taller-pdf`, y marca la opción **Public**.
-2. Sube los archivos de esta carpeta (`index.html`, `README.md`, `LICENSE`) con **Add file → Upload files**.
-3. Ve a **Settings → Pages**. En **Source** elige **Deploy from a branch**, rama `main`, carpeta `/ (root)`, y guarda.
-4. En uno o dos minutos la herramienta queda disponible en `https://TU-USUARIO.github.io/taller-pdf/`.
-
-Para usarla sin internet basta con abrir `index.html` en el navegador. La primera vez necesita conexión para cargar las librerías.
 
 ## Librerías
 
@@ -48,3 +42,7 @@ Se cargan desde cdnjs y jsDelivr con la versión fija.
 ## Licencia
 
 MIT. Ver [LICENSE](LICENSE).
+
+---
+
+Una herramienta de **Globeco Smart** · Designed by W.I.G. — CTO & DoA
